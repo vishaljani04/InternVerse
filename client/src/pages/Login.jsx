@@ -25,8 +25,8 @@ const Login = () => {
                 if (role === 'admin' || role === 'hr') {
                     // Admin/HR should not login here
                     setError('This login is for interns only. Admin/HR please use the admin login.');
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
+                    localStorage.removeItem('intern_token');
+                    localStorage.removeItem('intern_user');
                     setLoading(false);
                     return;
                 }

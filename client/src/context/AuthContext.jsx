@@ -13,10 +13,19 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    // Get prefix based on current portal path
+    const getPortalPrefix = () => {
+        const path = window.location.pathname;
+        if (path.startsWith('/admin')) return 'admin_';
+        if (path.startsWith('/hr')) return 'hr_';
+        return 'intern_';
+    };
+
     useEffect(() => {
         const verifySession = async () => {
-            const token = localStorage.getItem('token');
-            const savedUser = localStorage.getItem('user');
+            const prefix = getPortalPrefix();
+            const token = localStorage.getItem(`${prefix}token`);
+            const savedUser = localStorage.getItem(`${prefix}user`);
 
             if (!token || !savedUser) {
                 setLoading(false);
@@ -25,21 +34,26 @@ export const AuthProvider = ({ children }) => {
 
             try {
                 // Verify token with backend
-                const { data } = await api.get('/auth/profile');
+                const { data } = await api.get('/auth/profile', {
+                    headers: {
+                        Authorization: `Bearer ${token}` // Ensure we use the correct token for verification
+                    }
+                });
+                
                 if (data.success && data.user) {
                     const userData = { ...data.user };
-                    localStorage.setItem('user', JSON.stringify(userData));
+                    localStorage.setItem(`${prefix}user`, JSON.stringify(userData));
                     setUser(userData);
                 } else {
                     // Invalid token
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
+                    localStorage.removeItem(`${prefix}token`);
+                    localStorage.removeItem(`${prefix}user`);
                     setUser(null);
                 }
             } catch {
                 // Token expired or invalid
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
+                localStorage.removeItem(`${prefix}token`);
+                localStorage.removeItem(`${prefix}user`);
                 setUser(null);
             }
             setLoading(false);
@@ -51,8 +65,10 @@ export const AuthProvider = ({ children }) => {
     const login = async (email, password) => {
         const { data } = await api.post('/auth/login', { email, password });
         if (data.success) {
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
+            const role = data.user.role;
+            const prefix = role === 'admin' ? 'admin_' : role === 'hr' ? 'hr_' : 'intern_';
+            localStorage.setItem(`${prefix}token`, data.token);
+            localStorage.setItem(`${prefix}user`, JSON.stringify(data.user));
             setUser(data.user);
         }
         return data;
@@ -61,16 +77,27 @@ export const AuthProvider = ({ children }) => {
     const register = async (userData) => {
         const { data } = await api.post('/auth/register', userData);
         if (data.success) {
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
+            const role = data.user.role;
+            const prefix = role === 'admin' ? 'admin_' : role === 'hr' ? 'hr_' : 'intern_';
+            localStorage.setItem(`${prefix}token`, data.token);
+            localStorage.setItem(`${prefix}user`, JSON.stringify(data.user));
             setUser(data.user);
         }
         return data;
     };
 
     const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        const currentPrefix = getPortalPrefix();
+        localStorage.removeItem(`${currentPrefix}token`);
+        localStorage.removeItem(`${currentPrefix}user`);
+        
+        // Also wipe user state's role prefix to be safe if it mismatches portal
+        if (user?.role) {
+            const userPrefix = user.role === 'admin' ? 'admin_' : user.role === 'hr' ? 'hr_' : 'intern_';
+            localStorage.removeItem(`${userPrefix}token`);
+            localStorage.removeItem(`${userPrefix}user`);
+        }
+        
         setUser(null);
     };
 

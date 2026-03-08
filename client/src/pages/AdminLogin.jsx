@@ -31,8 +31,10 @@ const AdminLogin = () => {
                     navigate('/hr/dashboard');
                 } else {
                     setError('Access denied. This login is for Admin/HR only.');
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
+                    localStorage.removeItem('admin_token');
+                    localStorage.removeItem('admin_user');
+                    localStorage.removeItem('hr_token');
+                    localStorage.removeItem('hr_user');
                 }
             }
         } catch (err) {
