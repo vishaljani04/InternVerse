@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Bell, BellDot, Check, Trash2, ExternalLink } from 'lucide-react';
 import api from '../../services/api';
 
-const NotificationBell = () => {
+const NotificationBell = ({ align = 'right' }) => {
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
@@ -73,8 +73,8 @@ const NotificationBell = () => {
             </button>
 
             {isOpen && (
-                <div className="absolute left-full ml-2 bottom-0 w-80 max-h-[400px] bg-white rounded-2xl shadow-2xl border border-surface-200 z-50 flex flex-col overflow-hidden animate-in fade-in slide-in-from-left-2 duration-200">
-                    <div className="p-4 border-b border-surface-100 flex items-center justify-between bg-surface-50">
+                <div className={`absolute ${align === 'right' ? 'right-0' : 'left-0'} top-full mt-2 w-80 max-h-[400px] bg-white rounded-2xl shadow-2xl border border-surface-200 z-50 flex flex-col overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200`}>
+                    <div className="p-4 border-b border-surface-100 flex items-center justify-between bg-surface-50 text-left">
                         <h3 className="font-bold text-surface-900 flex items-center gap-2">
                             Notifications
                             {unreadCount > 0 && <span className="badge badge-primary">{unreadCount} New</span>}

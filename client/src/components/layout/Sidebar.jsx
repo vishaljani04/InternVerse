@@ -112,7 +112,7 @@ const Sidebar = () => {
                     >
                         {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
                     </button>
-                    {!collapsed && <NotificationBell />}
+                    {!collapsed && <NotificationBell align="left" />}
                 </div>
 
                 {/* Navigation */}
